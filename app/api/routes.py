@@ -2,6 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import List
+from typing import List, Optional
+from sqlalchemy import func
+from app.repositories.polymer_repository import PolymerRepository
 
 from app.core.database import get_db
 from app.models.schemas import (
@@ -98,15 +101,19 @@ async def ingest_polymers(
 async def get_polymers(
     start: datetime = Query(..., description="Start timestamp (ISO8601)"),
     end: datetime = Query(..., description="End timestamp (ISO8601)"),
+    length_gt: Optional[int] = Query(None, description="Filter polymers longer than"),
+    length_lt: Optional[int] = Query(None, description="Filter polymers shorter than"),
+    substring: Optional[str] = Query(None, description="Filter polymers containing substring"),
+    case_sensitive: bool = Query(True, description="Case-sensitive substring matching"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Retrieve polymer records between two timestamps.
+    Retrieve polymer records between two timestamps with optional filters.
     
     - Results are ordered by timestamp
     - Both start and end parameters are required
-    - Timestamps should be in ISO8601 format
+    - Optional filters: length_gt, length_lt, substring
     """
     if start > end:
         raise HTTPException(
@@ -114,8 +121,17 @@ async def get_polymers(
             detail="Start timestamp must be before end timestamp"
         )
     
+    # Validate length filters
+    if length_gt is not None and length_lt is not None and length_gt >= length_lt:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="length_gt must be less than length_lt"
+        )
+    
     repository = PolymerRepository(db)
-    polymers = repository.get_by_time_range(start, end)
+    polymers = repository.get_by_time_range_with_filters(
+        start, end, length_gt, length_lt, substring, case_sensitive
+    )
     
     return PolymerList(polymers=[p for p in polymers])
 
