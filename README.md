@@ -83,7 +83,6 @@ This project demonstrates:
 
 ### 📦 Installation
 
-```bash
 # Clone the repository
 git clone <repository-url>
 cd DataProphet
@@ -100,7 +99,6 @@ pip install -r requirements.txt
 
 ## ▶️ Running the Application
 
-```bash
 # Start the API server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
@@ -157,5 +155,8 @@ The system includes **comprehensive test coverage** across all components:
 - 🔄 Real-time polymer processing streams  
 - 🔐 Enhanced authentication and user management  
 - 🗃️ Support for additional database backends  
-- 📱 Mobile companion application  
+- 📱 Mobile companion application
+
+## 📑 Project Report
+  A detailed report about the project is available in the [`Project_Report.pdf`](https://drive.google.com/file/d/1HXMFmwLuuaTwZM_xc2zbo_aVKooEnDSk/view?usp=drive_link).
 
